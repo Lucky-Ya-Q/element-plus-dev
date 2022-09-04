@@ -31,7 +31,7 @@
         :trigger-target-el="triggerTargetEl"
         :visible="shouldShow"
         :z-index="zIndex"
-        @mouseenter="onContentEnter"
+        @mouseenter.once="onContentEnter"
         @mouseleave="onContentLeave"
         @blur="onBlur"
         @close="onClose"
@@ -126,11 +126,17 @@ export default defineComponent({
       }
     })
 
-    const onContentLeave = composeEventHandlers(stopWhenControlled, () => {
-      if (unref(trigger) === 'hover') {
-        onClose()
+    const onContentLeave = composeEventHandlers(
+      stopWhenControlled,
+      (e: MouseEvent) => {
+        if (unref(trigger) === 'hover') {
+          onClose()
+          e.target?.addEventListener('mouseenter', onContentEnter, {
+            once: true,
+          })
+        }
       }
-    })
+    )
 
     const onBeforeEnter = () => {
       contentRef.value?.updatePopper?.()
